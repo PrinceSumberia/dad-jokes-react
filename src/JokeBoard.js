@@ -46,6 +46,9 @@ export default class JokeBoard extends Component {
 		console.log(score);
 		let emoji;
 		switch (true) {
+			case score < 0:
+				emoji = '🙄';
+				break;
 			case score > 2 && score <= 5:
 				emoji = '😁';
 				break;
