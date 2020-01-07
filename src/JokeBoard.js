@@ -9,7 +9,6 @@ export default class JokeBoard extends Component {
 		this.state = { jokes: [] };
 		this.getJokes = this.getJokes.bind(this);
 		this.updateScore = this.updateScore.bind(this);
-		this.setEmoji = this.setEmoji.bind(this);
 	}
 
 	componentDidMount() {
@@ -43,7 +42,6 @@ export default class JokeBoard extends Component {
 	}
 
 	setEmoji(score) {
-		console.log(score);
 		let emoji;
 		switch (true) {
 			case score < 0:
