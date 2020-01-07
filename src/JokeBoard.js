@@ -36,8 +36,6 @@ export default class JokeBoard extends Component {
 					joke.score -= 1;
 				}
 				joke.emoji = this.setEmoji(joke.score);
-				console.log(joke.score);
-				console.log(joke.emoji);
 			}
 			return joke;
 		});
@@ -48,16 +46,16 @@ export default class JokeBoard extends Component {
 		console.log(score);
 		let emoji;
 		switch (true) {
-			case score > 1 && score <= 2:
+			case score > 2 && score <= 5:
 				emoji = '😁';
 				break;
-			case score > 2 && score <= 5:
+			case score > 5 && score <= 10:
 				emoji = '😅';
 				break;
-			case score > 5 && score <= 10:
+			case score > 10 && score <= 15:
 				emoji = '😂';
 				break;
-			case score > 10:
+			case score > 15:
 				emoji = '🤣';
 				break;
 			default:
