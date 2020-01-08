@@ -7,14 +7,14 @@ import './JokeList.css';
 export default class JokeBoard extends Component {
 	constructor(props) {
 		super(props);
-		this.state = { loading: false, jokes: [] };
+		this.state = { loading: false, jokes: JSON.parse(window.localStorage.getItem('jokes')) || [] };
 		this.getJokes = this.getJokes.bind(this);
 		this.updateScore = this.updateScore.bind(this);
 		this.handleClick = this.handleClick.bind(this);
 	}
 
 	componentDidMount() {
-		this.getJokes();
+		if (this.state.jokes.length === 0) this.getJokes();
 	}
 
 	handleClick() {
@@ -22,15 +22,22 @@ export default class JokeBoard extends Component {
 	}
 
 	async getJokes() {
-		let newJokes = [];
-		for (let index = 0; index < 10; index++) {
-			const response = await axios.get('https://icanhazdadjoke.com/slack');
-			newJokes = [ ...newJokes, { id: uuid(), text: response.data.attachments[0].text, score: 0 } ];
+		try {
+			let newJokes = [];
+			for (let index = 0; index < 10; index++) {
+				const response = await axios.get('https://icanhazdadjoke.com/slack');
+				newJokes = [ ...newJokes, { id: uuid(), text: response.data.attachments[0].text, score: 0 } ];
+			}
+			this.setState(
+				(st) => ({
+					loading: false,
+					jokes: [ ...st.jokes, ...newJokes ]
+				}),
+				() => window.localStorage.setItem('jokes', JSON.stringify(this.state.jokes))
+			);
+		} catch (error) {
+			console.log('An Error Occured');
 		}
-		this.setState((st) => ({
-			loading: false,
-			jokes: [ ...st.jokes, ...newJokes ]
-		}));
 	}
 
 	updateScore(vote, id) {
