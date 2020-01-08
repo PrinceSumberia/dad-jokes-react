@@ -8,9 +8,9 @@ export default class JokeBoard extends Component {
 	constructor(props) {
 		super(props);
 		this.state = { loading: false, jokes: JSON.parse(window.localStorage.getItem('jokes')) || [] };
-		this.getJokes = this.getJokes.bind(this);
 		this.updateScore = this.updateScore.bind(this);
 		this.handleClick = this.handleClick.bind(this);
+		this.seenJokes = new Set(this.state.jokes.map((j) => j.text));
 	}
 
 	componentDidMount() {
@@ -26,7 +26,12 @@ export default class JokeBoard extends Component {
 			let newJokes = [];
 			for (let index = 0; index < 10; index++) {
 				const response = await axios.get('https://icanhazdadjoke.com/slack');
-				newJokes = [ ...newJokes, { id: uuid(), text: response.data.attachments[0].text, score: 0 } ];
+				let newJoke = response.data.attachments[0].text;
+				if (!this.seenJokes.has(newJoke)) {
+					newJokes = [ ...newJokes, { id: uuid(), text: newJoke, score: 0 } ];
+				} else {
+					console.log('Duplicate Issues: Joke already seen!');
+				}
 			}
 			this.setState(
 				(st) => ({
@@ -41,17 +46,34 @@ export default class JokeBoard extends Component {
 	}
 
 	updateScore(vote, id) {
-		const updatedJokes = this.state.jokes.map((joke) => {
-			if (joke.id === id) {
-				if (vote === 'up-vote') {
-					joke.score += 1;
-				} else {
-					joke.score -= 1;
-				}
-			}
-			return joke;
-		});
-		this.setState({ jokes: updatedJokes });
+		this.setState(
+			(st) => ({
+				jokes: st.jokes.map((joke) => {
+					if (joke.id === id) {
+						if (vote === 'up-vote') {
+							joke.score += 1;
+						} else {
+							joke.score -= 1;
+						}
+					}
+					return joke;
+				})
+			}),
+			() => window.localStorage.setItem('jokes', JSON.stringify(this.state.jokes))
+		);
+		// const updatedJokes = this.state.jokes.map((joke) => {
+		// 	if (joke.id === id) {
+		// 		if (vote === 'up-vote') {
+		// 			joke.score += 1;
+		// 		} else {
+		// 			joke.score -= 1;
+		// 		}
+		// 	}
+		// 	return joke;
+		// });
+		// this.setState({ jokes: updatedJokes }, () =>
+		// 	window.localStorage.setItem('jokes', JSON.stringify(this.state.jokes))
+		// );
 	}
 
 	render() {
