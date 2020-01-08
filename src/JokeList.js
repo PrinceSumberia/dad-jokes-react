@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Joke from './Joke';
 import axios from 'axios';
 import uuid from 'uuid/v4';
+import './JokeList.css';
 
 export default class JokeBoard extends Component {
 	constructor(props) {
@@ -19,7 +20,7 @@ export default class JokeBoard extends Component {
 		let newJokes = [];
 		for (let index = 0; index < 10; index++) {
 			const response = await axios.get('https://icanhazdadjoke.com/slack');
-			newJokes = [ ...newJokes, { id: uuid(), text: response.data.attachments[0].text, score: 0, emoji: '😀' } ];
+			newJokes = [ ...newJokes, { id: uuid(), text: response.data.attachments[0].text, score: 0 } ];
 		}
 		this.setState((st) => ({
 			jokes: [ ...st.jokes, ...newJokes ]
@@ -34,53 +35,40 @@ export default class JokeBoard extends Component {
 				} else {
 					joke.score -= 1;
 				}
-				joke.emoji = this.setEmoji(joke.score);
 			}
 			return joke;
 		});
 		this.setState({ jokes: updatedJokes });
 	}
 
-	setEmoji(score) {
-		let emoji;
-		switch (true) {
-			case score < 0:
-				emoji = '🙄';
-				break;
-			case score > 2 && score <= 5:
-				emoji = '😁';
-				break;
-			case score > 5 && score <= 10:
-				emoji = '😅';
-				break;
-			case score > 10 && score <= 15:
-				emoji = '😂';
-				break;
-			case score > 15:
-				emoji = '🤣';
-				break;
-			default:
-				emoji = '😀';
-				break;
-		}
-		return emoji;
-	}
-
 	render() {
-		const jokes = this.state.jokes.map((joke) => (
-			<Joke
-				key={joke.id}
-				id={joke.id}
-				joke={joke.text}
-				score={joke.score}
-				emoji={joke.emoji}
-				updateScore={this.updateScore}
-			/>
-		));
+		let jokes = this.state.jokes.sort((a, b) => b.score - a.score);
+
 		return (
-			<div>
-				{jokes}
-				<button onClick={this.getJokes}>New Jokes!</button>
+			<div className="JokeList">
+				<div className="JokeList-sidebar">
+					<h1 className="JokeList-title">
+						<span>Dad</span> Jokes
+					</h1>
+					<img
+						alt="fetch-button"
+						src="https://assets.dryicons.com/uploads/icon/svg/8927/0eb14c71-38f2-433a-bfc8-23d9c99b3647.svg"
+					/>
+					<button className="JokeList-getmore" onClick={this.getJokes}>
+						Fetch Jokes
+					</button>
+				</div>
+				<div className="JokeList-jokes">
+					{jokes.map((joke) => (
+						<Joke
+							key={joke.id}
+							id={joke.id}
+							joke={joke.text}
+							score={joke.score}
+							updateScore={this.updateScore}
+						/>
+					))}
+				</div>
 			</div>
 		);
 	}
